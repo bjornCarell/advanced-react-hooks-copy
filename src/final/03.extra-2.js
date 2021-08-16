@@ -5,81 +5,87 @@
 // you can edit this here and look at the isolated page or you can copy/paste
 // this in the regular exercise file.
 
-import * as React from 'react'
-import {useAsync} from '../utils'
+import * as React from 'react';
+import {useAsync} from '../utils';
 import {
   fetchPokemon,
   PokemonForm,
   PokemonDataView,
   PokemonInfoFallback,
   PokemonErrorBoundary,
-} from '../pokemon'
+} from '../pokemon';
 
-const PokemonCacheContext = React.createContext()
+const PokemonCacheContext = React.createContext();
 
 function pokemonCacheReducer(state, action) {
   switch (action.type) {
     case 'ADD_POKEMON': {
-      return {...state, [action.pokemonName]: action.pokemonData}
+      return {...state, [action.pokemonName]: action.pokemonData};
     }
     default: {
-      throw new Error(`Unhandled action type: ${action.type}`)
+      throw new Error(`Unhandled action type: ${action.type}`);
     }
   }
 }
 
 function PokemonCacheProvider(props) {
-  const [cache, dispatch] = React.useReducer(pokemonCacheReducer, {})
-  return <PokemonCacheContext.Provider value={[cache, dispatch]} {...props} />
+  const [cache, dispatch] = React.useReducer(pokemonCacheReducer, {});
+  return <PokemonCacheContext.Provider value={[cache, dispatch]} {...props} />;
 }
 
 function usePokemonCache() {
-  const context = React.useContext(PokemonCacheContext)
+  const context = React.useContext(PokemonCacheContext);
   if (!context) {
     throw new Error(
       'usePokemonCache must be used within a PokemonCacheProvider',
-    )
+    );
   }
-  return context
+  return context;
 }
 
 function PokemonInfo({pokemonName}) {
-  const [cache, dispatch] = usePokemonCache()
+  const [cache, dispatch] = usePokemonCache();
 
-  const {data: pokemon, status, error, run, setData} = useAsync({
+  const {
+    data: pokemon,
+    status,
+    error,
+    run,
+    setData,
+  } = useAsync({
     status: pokemonName ? 'pending' : 'idle',
-  })
+  });
 
   React.useEffect(() => {
     if (!pokemonName) {
-      return
+      return;
     } else if (cache[pokemonName]) {
-      setData(cache[pokemonName])
+      setData(cache[pokemonName]);
     } else {
       run(
         fetchPokemon(pokemonName).then(pokemonData => {
-          dispatch({type: 'ADD_POKEMON', pokemonName, pokemonData})
-          return pokemonData
+          dispatch({type: 'ADD_POKEMON', pokemonName, pokemonData});
+          return pokemonData;
         }),
-      )
+      );
     }
-  }, [cache, dispatch, pokemonName, run, setData])
+  }, [cache, dispatch, pokemonName, run, setData]);
 
   if (status === 'idle') {
-    return 'Submit a pokemon'
+    return 'Submit a pokemon';
   } else if (status === 'pending') {
-    return <PokemonInfoFallback name={pokemonName} />
+    return <PokemonInfoFallback name={pokemonName} />;
   } else if (status === 'rejected') {
-    throw error
+    throw error;
   } else if (status === 'resolved') {
-    return <PokemonDataView pokemon={pokemon} />
+    return <PokemonDataView pokemon={pokemon} />;
   }
 
-  throw new Error('This should be impossible')
+  throw new Error('This should be impossible');
 }
 
 function PreviousPokemon({onSelect}) {
-  const [cache] = usePokemonCache()
+  const [cache] = usePokemonCache();
   return (
     <div>
       Previous Pokemon
@@ -96,7 +102,7 @@ function PreviousPokemon({onSelect}) {
         ))}
       </ul>
     </div>
-  )
+  );
 }
 
 function PokemonSection({onSelect, pokemonName}) {
@@ -114,18 +120,18 @@ function PokemonSection({onSelect, pokemonName}) {
         </div>
       </div>
     </PokemonCacheProvider>
-  )
+  );
 }
 
 function App() {
-  const [pokemonName, setPokemonName] = React.useState(null)
+  const [pokemonName, setPokemonName] = React.useState(null);
 
   function handleSubmit(newPokemonName) {
-    setPokemonName(newPokemonName)
+    setPokemonName(newPokemonName);
   }
 
   function handleSelect(newPokemonName) {
-    setPokemonName(newPokemonName)
+    setPokemonName(newPokemonName);
   }
 
   return (
@@ -134,7 +140,7 @@ function App() {
       <hr />
       <PokemonSection onSelect={handleSelect} pokemonName={pokemonName} />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

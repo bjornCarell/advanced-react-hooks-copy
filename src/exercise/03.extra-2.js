@@ -5,15 +5,15 @@
 // you can edit this here and look at the isolated page or you can copy/paste
 // this in the regular exercise file.
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   fetchPokemon,
   PokemonForm,
   PokemonDataView,
   PokemonInfoFallback,
   PokemonErrorBoundary,
-} from '../pokemon'
-import {useAsync} from '../utils'
+} from '../pokemon';
+import {useAsync} from '../utils';
 
 // 🐨 Create a PokemonCacheContext
 
@@ -27,50 +27,50 @@ import {useAsync} from '../utils'
 function pokemonCacheReducer(state, action) {
   switch (action.type) {
     case 'ADD_POKEMON': {
-      return {...state, [action.pokemonName]: action.pokemonData}
+      return {...state, [action.pokemonName]: action.pokemonData};
     }
     default: {
-      throw new Error(`Unhandled action type: ${action.type}`)
+      throw new Error(`Unhandled action type: ${action.type}`);
     }
   }
 }
 
 function PokemonInfo({pokemonName}) {
   // 💣 remove the useReducer here (or move it up to your PokemonCacheProvider)
-  const [cache, dispatch] = React.useReducer(pokemonCacheReducer, {})
+  const [cache, dispatch] = React.useReducer(pokemonCacheReducer, {});
   // 🐨 get the cache and dispatch from useContext with PokemonCacheContext
 
-  const {data: pokemon, status, error, run, setData} = useAsync()
+  const {data: pokemon, status, error, run, setData} = useAsync();
 
   React.useEffect(() => {
     if (!pokemonName) {
-      return
+      return;
     } else if (cache[pokemonName]) {
-      setData(cache[pokemonName])
+      setData(cache[pokemonName]);
     } else {
       run(
         fetchPokemon(pokemonName).then(pokemonData => {
-          dispatch({type: 'ADD_POKEMON', pokemonName, pokemonData})
-          return pokemonData
+          dispatch({type: 'ADD_POKEMON', pokemonName, pokemonData});
+          return pokemonData;
         }),
-      )
+      );
     }
-  }, [cache, pokemonName, run, setData])
+  }, [cache, pokemonName, run, setData]);
 
   if (status === 'idle') {
-    return 'Submit a pokemon'
+    return 'Submit a pokemon';
   } else if (status === 'pending') {
-    return <PokemonInfoFallback name={pokemonName} />
+    return <PokemonInfoFallback name={pokemonName} />;
   } else if (status === 'rejected') {
-    throw error
+    throw error;
   } else if (status === 'resolved') {
-    return <PokemonDataView pokemon={pokemon} />
+    return <PokemonDataView pokemon={pokemon} />;
   }
 }
 
 function PreviousPokemon({onSelect}) {
   // 🐨 get the cache from useContext with PokemonCacheContext
-  const cache = {}
+  const cache = {};
   return (
     <div>
       Previous Pokemon
@@ -87,7 +87,7 @@ function PreviousPokemon({onSelect}) {
         ))}
       </ul>
     </div>
-  )
+  );
 }
 
 function PokemonSection({onSelect, pokemonName}) {
@@ -105,18 +105,18 @@ function PokemonSection({onSelect, pokemonName}) {
         </PokemonErrorBoundary>
       </div>
     </div>
-  )
+  );
 }
 
 function App() {
-  const [pokemonName, setPokemonName] = React.useState(null)
+  const [pokemonName, setPokemonName] = React.useState(null);
 
   function handleSubmit(newPokemonName) {
-    setPokemonName(newPokemonName)
+    setPokemonName(newPokemonName);
   }
 
   function handleSelect(newPokemonName) {
-    setPokemonName(newPokemonName)
+    setPokemonName(newPokemonName);
   }
 
   return (
@@ -125,7 +125,7 @@ function App() {
       <hr />
       <PokemonSection onSelect={handleSelect} pokemonName={pokemonName} />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

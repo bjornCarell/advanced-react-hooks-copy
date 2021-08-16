@@ -1,27 +1,27 @@
 // useContext: simple Counter
 // http://localhost:3000/isolated/final/03.js
 
-import * as React from 'react'
+import * as React from 'react';
 
-const CountContext = React.createContext()
+const CountContext = React.createContext();
 
 function CountProvider(props) {
-  const [count, setCount] = React.useState(0)
-  const value = [count, setCount]
+  const [count, setCount] = React.useState(0);
+  const value = [count, setCount];
   // could also do it like this:
   // const value = React.useState(0)
-  return <CountContext.Provider value={value} {...props} />
+  return <CountContext.Provider value={value} {...props} />;
 }
 
 function CountDisplay() {
-  const [count] = React.useContext(CountContext)
-  return <div>{`The current count is ${count}`}</div>
+  const [count] = React.useContext(CountContext);
+  return <div>{`The current count is ${count}`}</div>;
 }
 
 function Counter() {
-  const [, setCount] = React.useContext(CountContext)
-  const increment = () => setCount(c => c + 1)
-  return <button onClick={increment}>Increment count</button>
+  const [, setCount] = React.useContext(CountContext);
+  const increment = () => setCount(c => c + 1);
+  return <button onClick={increment}>Increment count</button>;
 }
 
 function App() {
@@ -32,7 +32,7 @@ function App() {
         <Counter />
       </CountProvider>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

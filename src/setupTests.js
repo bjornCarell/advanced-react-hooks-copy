@@ -1,1 +1,1 @@
-import '@kentcdodds/react-workshop-app/setup-tests'
+import '@kentcdodds/react-workshop-app/setup-tests';
