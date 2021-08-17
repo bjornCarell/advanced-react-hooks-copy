@@ -15,9 +15,9 @@ const STATUSES = {
   PENDING: 'PENDING',
   RESOLVED: 'RESOLVED',
   REJECTED: 'REJECTED',
-}
+};
 
-const { IDLE, PENDING, RESOLVED, REJECTED } = STATUSES;
+const {IDLE, PENDING, RESOLVED, REJECTED} = STATUSES;
 
 function asyncReducer(state, action) {
   switch (action.type) {
@@ -36,22 +36,25 @@ function asyncReducer(state, action) {
   }
 }
 
-const useSafeDispatch = (dispatch) => {
+const useSafeDispatch = dispatch => {
   const mountedRef = React.useRef(false);
 
   React.useLayoutEffect(() => {
     mountedRef.current = true;
-    return () => mountedRef.current = false;
+    return () => (mountedRef.current = false);
   }, []);
 
-  return React.useCallback((...args) => {
-    if(mountedRef.current) {
-      dispatch(...args);
-    }
-  }, [dispatch]);
-} 
+  return React.useCallback(
+    (...args) => {
+      if (mountedRef.current) {
+        dispatch(...args);
+      }
+    },
+    [dispatch],
+  );
+};
 
-const useAsync = (initState) => {
+const useAsync = initState => {
   const [state, unsafeDispatch] = React.useReducer(asyncReducer, {
     status: IDLE,
     data: null,
@@ -61,24 +64,27 @@ const useAsync = (initState) => {
 
   const dispatch = useSafeDispatch(unsafeDispatch);
 
-  const run = React.useCallback(promise => {
-    unsafeDispatch({type: PENDING});
-    promise.then(
-      data => {
-        dispatch({type: RESOLVED, data});
-      },
-      error => {
-        dispatch({type: REJECTED, error});
-      }
-    );
-  }, [dispatch]);
+  const run = React.useCallback(
+    promise => {
+      unsafeDispatch({type: PENDING});
+      promise.then(
+        data => {
+          dispatch({type: RESOLVED, data});
+        },
+        error => {
+          dispatch({type: REJECTED, error});
+        },
+      );
+    },
+    [dispatch],
+  );
 
   return {...state, run};
 };
 
 function PokemonInfo({pokemonName}) {
   const {
-    data:pokemon,
+    data: pokemon,
     status,
     error,
     run,
@@ -88,7 +94,7 @@ function PokemonInfo({pokemonName}) {
     if (!pokemonName) {
       return;
     }
-  
+
     run(fetchPokemon(pokemonName));
   }, [pokemonName, run]);
 
@@ -107,8 +113,6 @@ function PokemonInfo({pokemonName}) {
 
 function App() {
   const [pokemonName, setPokemonName] = React.useState('');
-
-  
 
   function handleSubmit(newPokemonName) {
     setPokemonName(newPokemonName);
