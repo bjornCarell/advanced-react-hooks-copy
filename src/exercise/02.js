@@ -10,17 +10,25 @@ import {
   PokemonErrorBoundary,
 } from '../pokemon';
 
-// 🐨 this is going to be our generic asyncReducer
+const STATUSES = {
+  IDLE: 'IDLE',
+  PENDING: 'PENDING',
+  RESOLVED: 'RESOLVED',
+  REJECTED: 'REJECTED',
+}
+
+const { IDLE, PENDING, RESOLVED, REJECTED } = STATUSES;
+
 function asyncReducer(state, action) {
   switch (action.type) {
-    case 'pending': {
-      return {status: 'pending', data: null, error: null};
+    case PENDING: {
+      return {status: PENDING, data: null, error: null};
     }
-    case 'resolved': {
-      return {status: 'resolved', data: action.data, error: null};
+    case RESOLVED: {
+      return {status: RESOLVED, data: action.data, error: null};
     }
-    case 'rejected': {
-      return {status: 'rejected', data: null, error: action.error};
+    case REJECTED: {
+      return {status: REJECTED, data: null, error: action.error};
     }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
@@ -30,7 +38,7 @@ function asyncReducer(state, action) {
 
 const useAsync = (asyncCallback, initState) => {
   const [state, dispatch] = React.useReducer(asyncReducer, {
-    status: 'idle',
+    status: IDLE,
     data: null,
     error: null,
     ...initState,
@@ -42,13 +50,13 @@ const useAsync = (asyncCallback, initState) => {
       return;
     }
 
-    dispatch({type: 'pending'});
+    dispatch({type: PENDING});
     promise.then(
       data => {
-        dispatch({type: 'resolved', data});
+        dispatch({type: RESOLVED, data});
       },
       error => {
-        dispatch({type: 'rejected', error});
+        dispatch({type: REJECTED, error});
       },
     );
   }, [asyncCallback]);
@@ -66,18 +74,18 @@ function PokemonInfo({pokemonName}) {
 
   const state = useAsync(
     asyncCallback,
-    {status: pokemonName ? 'pending' : 'idle'},
+    {status: pokemonName ? PENDING : IDLE},
   );
 
   const {data, status, error} = state;
 
-  if (status === 'idle' || !pokemonName) {
+  if (status === IDLE || !pokemonName) {
     return 'Submit a pokemon';
-  } else if (status === 'pending') {
+  } else if (status === PENDING) {
     return <PokemonInfoFallback name={pokemonName} />;
-  } else if (status === 'rejected') {
+  } else if (status === REJECTED) {
     throw error;
-  } else if (status === 'resolved') {
+  } else if (status === RESOLVED) {
     return <PokemonDataView pokemon={data} />;
   }
 
