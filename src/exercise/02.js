@@ -36,16 +36,33 @@ function asyncReducer(state, action) {
   }
 }
 
+const useSafeDispatch = (dispatch) => {
+  const mountedRef = React.useRef(false);
+
+  React.useLayoutEffect(() => {
+    mountedRef.current = true;
+    return () => mountedRef.current = false;
+  }, []);
+
+  return React.useCallback((...args) => {
+    if(mountedRef.current) {
+      dispatch(...args);
+    }
+  }, [dispatch]);
+} 
+
 const useAsync = (initState) => {
-  const [state, dispatch] = React.useReducer(asyncReducer, {
+  const [state, unsafeDispatch] = React.useReducer(asyncReducer, {
     status: IDLE,
     data: null,
     error: null,
     ...initState,
   });
 
+  const dispatch = useSafeDispatch(unsafeDispatch);
+
   const run = React.useCallback(promise => {
-    dispatch({type: PENDING});
+    unsafeDispatch({type: PENDING});
     promise.then(
       data => {
         dispatch({type: RESOLVED, data});
@@ -53,8 +70,8 @@ const useAsync = (initState) => {
       error => {
         dispatch({type: REJECTED, error});
       }
-    )
-  }, [])
+    );
+  }, [dispatch]);
 
   return {...state, run};
 };
@@ -71,6 +88,7 @@ function PokemonInfo({pokemonName}) {
     if (!pokemonName) {
       return;
     }
+  
     run(fetchPokemon(pokemonName));
   }, [pokemonName, run]);
 
@@ -89,6 +107,8 @@ function PokemonInfo({pokemonName}) {
 
 function App() {
   const [pokemonName, setPokemonName] = React.useState('');
+
+  
 
   function handleSubmit(newPokemonName) {
     setPokemonName(newPokemonName);
