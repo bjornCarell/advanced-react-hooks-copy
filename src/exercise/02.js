@@ -36,26 +36,29 @@ function asyncReducer(state, action) {
   }
 }
 
-const useSafeDispatch = (dispatch) => {
+const useSafeDispatch = dispatch => {
   // ref to keep track of the HTML displayed on the screen
   const mountedRef = React.useRef(false);
   // Cleanup function
-  // useLayoutEffect used to makes sure it gets run before any HTML 
+  // useLayoutEffect used to makes sure it gets run before any HTML
   // changes on the screen.
   React.useLayoutEffect(() => {
     mountedRef.current = true;
     return () => (mountedRef.current = false);
   }, []);
   // we don't care about arguments here, they could be anything really
-  return React.useCallback((...args) => {
-    if (mountedRef.current) {
-      return dispatch(...args);
-    }
-  // since dispatch is given as an argument to the hook, React can't 
-  // no longer determine if it will stay intact - so we pass it 
-  // to the dependencies array
-  }, [dispatch]);
-}
+  return React.useCallback(
+    (...args) => {
+      if (mountedRef.current) {
+        return dispatch(...args);
+      }
+      // since dispatch is given as an argument to the hook, React can't
+      // no longer determine if it will stay intact - so we pass it
+      // to the dependencies array
+    },
+    [dispatch],
+  );
+};
 
 const useAsync = initState => {
   const [state, unsafeDispatch] = React.useReducer(asyncReducer, {
@@ -65,23 +68,26 @@ const useAsync = initState => {
     ...initState,
   });
 
-  // with the useSafeDispatch hook we can now let a component get 
-  // unmounted without causing a memory leak. 
+  // with the useSafeDispatch hook we can now let a component get
+  // unmounted without causing a memory leak.
   const dispatch = useSafeDispatch(unsafeDispatch);
 
-  const run = React.useCallback(promise => {
-    dispatch({type: PENDING});
-    promise.then(
-      data => {
-        dispatch({type: RESOLVED, data});
-      },
-      error => {
-        dispatch({type: REJECTED, error});
-      }
-    );
-  // with our own dispatch function we now need to pass dispatch
-  // to the dependencies array
-  }, [dispatch]);
+  const run = React.useCallback(
+    promise => {
+      dispatch({type: PENDING});
+      promise.then(
+        data => {
+          dispatch({type: RESOLVED, data});
+        },
+        error => {
+          dispatch({type: REJECTED, error});
+        },
+      );
+      // with our own dispatch function we now need to pass dispatch
+      // to the dependencies array
+    },
+    [dispatch],
+  );
 
   return {...state, run};
 };
@@ -98,9 +104,9 @@ function PokemonInfo({pokemonName}) {
     if (!pokemonName) {
       return;
     }
-  
+
     // the run function is given a promise to resolve
-    // this is our 
+    // this is our
     run(fetchPokemon(pokemonName));
   }, [pokemonName, run]);
 
