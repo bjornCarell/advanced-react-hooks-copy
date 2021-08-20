@@ -19,10 +19,10 @@ const PokemonCacheContext = React.createContext();
 
 const PokemonCacheProvider = props => {
   const [cache, dispatch] = React.useReducer(
-    pokemonCacheReducer, 
-    window.localStorage.getItem('cache') ? 
-      JSON.parse(window.localStorage.getItem('cache')) : 
-      {}
+    pokemonCacheReducer,
+    window.localStorage.getItem('cache')
+      ? JSON.parse(window.localStorage.getItem('cache'))
+      : {},
   );
   const [storageCache, setStorageCache] = useLocalStorageState('cache', cache);
 
@@ -30,7 +30,9 @@ const PokemonCacheProvider = props => {
     setStorageCache(cache);
   }, [cache, setStorageCache]);
 
-  return <PokemonCacheContext.Provider value={[storageCache, dispatch]} {...props} />;
+  return (
+    <PokemonCacheContext.Provider value={[storageCache, dispatch]} {...props} />
+  );
 };
 
 function pokemonCacheReducer(state, action) {
