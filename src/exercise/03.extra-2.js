@@ -46,7 +46,6 @@ function pokemonCacheReducer(state, action) {
 
 function PokemonInfo({pokemonName}) {
   const [cache, dispatch] = React.useContext(PokemonCacheContext);
-  console.log('PokemonInfo', cache);
 
   const {data: pokemon, status, error, run, setData} = useAsync();
 
