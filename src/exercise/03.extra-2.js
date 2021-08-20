@@ -13,13 +13,24 @@ import {
   PokemonInfoFallback,
   PokemonErrorBoundary,
 } from '../pokemon';
-import {useAsync} from '../utils';
+import {useAsync, useLocalStorageState} from '../utils';
 
 const PokemonCacheContext = React.createContext();
 
 const PokemonCacheProvider = props => {
-  const [cache, dispatch] = React.useReducer(pokemonCacheReducer, {});
-  return <PokemonCacheContext.Provider value={[cache, dispatch]} {...props} />;
+  const [cache, dispatch] = React.useReducer(
+    pokemonCacheReducer, 
+    window.localStorage.getItem('cache') ? 
+      JSON.parse(window.localStorage.getItem('cache')) : 
+      {}
+  );
+  const [storageCache, setStorageCache] = useLocalStorageState('cache', cache);
+
+  React.useEffect(() => {
+    setStorageCache(cache);
+  }, [cache, setStorageCache]);
+
+  return <PokemonCacheContext.Provider value={[storageCache, dispatch]} {...props} />;
 };
 
 function pokemonCacheReducer(state, action) {
@@ -35,6 +46,7 @@ function pokemonCacheReducer(state, action) {
 
 function PokemonInfo({pokemonName}) {
   const [cache, dispatch] = React.useContext(PokemonCacheContext);
+  console.log('PokemonInfo', cache);
 
   const {data: pokemon, status, error, run, setData} = useAsync();
 
@@ -66,7 +78,6 @@ function PokemonInfo({pokemonName}) {
 
 function PreviousPokemon({onSelect}) {
   const [cache] = React.useContext(PokemonCacheContext);
-  console.log(cache);
   return (
     <div>
       Previous Pokemon

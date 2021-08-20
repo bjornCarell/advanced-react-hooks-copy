@@ -79,4 +79,30 @@ function useAsync(initialState) {
   };
 }
 
-export {useAsync};
+const useLocalStorageState = (
+  key,
+  defaultValue = '',
+  {serialize = JSON.stringify, deserialize = JSON.parse} = {},
+) => {
+  const [value, setValue] = React.useState(() => {
+    const localStorageValue = window.localStorage.getItem(key);
+    if (localStorageValue) {
+      return deserialize(localStorageValue);
+    }
+    return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+  });
+  const prevKeyRef = React.useRef(key);
+
+  React.useEffect(() => {
+    const prevKey = prevKeyRef.current;
+    if (prevKey !== key) {
+      window.localStorage.removeItem(prevKey);
+    }
+    prevKeyRef.current = key;
+    window.localStorage.setItem(key, serialize(value));
+  }, [key, value, serialize]);
+
+  return [value, setValue];
+};
+
+export {useAsync, useLocalStorageState};
