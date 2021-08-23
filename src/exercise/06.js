@@ -3,6 +3,10 @@
 
 import * as React from 'react';
 
+// For this use case, formatDebugValue should not be used. 
+// The only time to use it is if the calculation of the value we want to use 
+// is expensive in any way. Here, in this case, we just make the operation
+// more expensive by adding the formatDebugValue to the useDebugValue hook. 
 const formatDebugValue = ({state, query}) =>
   `state: ${state}; query: ${query};`;
 
